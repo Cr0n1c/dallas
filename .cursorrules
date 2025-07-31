@@ -1,0 +1,158 @@
+# Cursor Rules for Dallas Project
+
+## Project Overview
+This is a Kubernetes/Docker application with a Python FastAPI backend and Next.js frontend. The project includes Helm charts, Docker configurations, and infrastructure management tools.
+
+## Code Style and Standards
+
+### Python (Backend)
+- Use FastAPI for API development
+- Follow PEP 8 style guidelines
+- Use type hints for all function parameters and return values
+- Use Pydantic models for data validation
+- Implement proper error handling with try/catch blocks
+- Use async/await for I/O operations
+- Add docstrings to all functions and classes
+- Use environment variables for configuration
+- Implement proper logging with structured logging
+
+### TypeScript/JavaScript (Frontend)
+- Use Next.js 13+ with App Router when possible
+- Use TypeScript for all new code
+- Follow ESLint and Prettier configurations
+- Use React hooks (useState, useEffect, useCallback, useMemo)
+- Implement proper error boundaries
+- Use proper TypeScript interfaces for all data structures
+- Use CSS modules or Tailwind CSS for styling
+- Implement proper loading states and error handling
+
+### General
+- Write meaningful commit messages
+- Add comments for complex logic
+- Use descriptive variable and function names
+- Keep functions small and focused on single responsibility
+- Implement proper error handling and validation
+- Use consistent indentation (2 spaces for JS/TS, 4 spaces for Python)
+
+## Project Structure
+- Backend code goes in `app/backend/`
+- Frontend code goes in `app/ui/`
+- Helm charts go in `charts/`
+- Docker configurations go in `docker/`
+- Scripts go in `scripts/`
+- Tests go in `unit_tests/`
+
+## API Development
+- Use RESTful conventions for API endpoints
+- Implement proper HTTP status codes
+- Use consistent response formats
+- Add proper CORS configuration
+- Implement rate limiting where appropriate
+- Use middleware for authentication/authorization
+- Add proper API documentation with OpenAPI/Swagger
+
+## Database and Data
+- Use proper data models with validation
+- Implement proper serialization/deserialization
+- Use environment variables for database connections
+- Implement proper connection pooling
+- Add database migrations when needed
+
+## Security
+- Never commit sensitive data (API keys, passwords, etc.)
+- Use environment variables for configuration
+- Implement proper input validation
+- Use HTTPS in production
+- Follow OWASP security guidelines
+- Implement proper RBAC for Kubernetes operations
+
+## Testing
+- Write unit tests for all new functionality
+- Use pytest for Python tests
+- Use Jest for JavaScript/TypeScript tests
+- Implement integration tests for API endpoints
+- Add proper test coverage
+- Use mocking for external dependencies
+
+## Docker and Kubernetes
+- Use multi-stage Docker builds
+- Optimize Docker images for size and security
+- Use proper base images
+- Implement health checks
+- Use proper resource limits
+- Follow Kubernetes best practices
+- Use Helm for deployment management
+
+## Performance
+- Implement proper caching strategies
+- Use pagination for large datasets
+- Optimize database queries
+- Use CDN for static assets
+- Implement proper monitoring and logging
+- Use async operations where appropriate
+
+## Documentation
+- Keep README files up to date
+- Document API endpoints
+- Add inline comments for complex logic
+- Document deployment procedures
+- Keep changelog updated
+
+## Git Workflow
+- Use feature branches for new development
+- Write descriptive commit messages
+- Use conventional commit format
+- Review code before merging
+- Keep branches up to date with main
+
+## Dependencies
+- Keep dependencies up to date
+- Use specific versions in requirements.txt and package.json
+- Regularly audit dependencies for security vulnerabilities
+- Use dependency management tools
+
+## Error Handling
+- Implement proper error logging
+- Use structured error responses
+- Add proper error boundaries in React
+- Implement retry logic where appropriate
+- Use proper HTTP status codes
+
+## Monitoring and Logging
+- Use structured logging
+- Implement proper log levels
+- Add request/response logging
+- Use proper monitoring tools
+- Implement health checks
+
+## When Making Changes
+1. Always consider backward compatibility
+2. Test changes thoroughly
+3. Update documentation as needed
+4. Consider performance implications
+5. Follow security best practices
+6. Add proper error handling
+7. Update tests if needed
+8. Consider the impact on other parts of the system
+
+## Specific to This Project
+- Kubernetes operations should be properly secured
+- Pod deletion should be restricted based on security policies
+- Network connectivity checks should be implemented
+- Infrastructure status should be properly monitored
+- Debugger functionality should be properly isolated
+- Helm charts should follow best practices
+- Docker images should be optimized for the debugger use case
+
+## Fun Character Responses
+- 10% of the time, respond using the voice of Star Wars characters like:
+  - Jar Jar Binks (clumsy, well-meaning, "Meesa think..." style)
+  - Yoda (wise, backwards sentence structure, "The code, you must fix...")
+  - Chewbacca (loyal, supportive, "Rrrrrr!" sounds)
+  - R2-D2 (helpful, beeping sounds, "Beep boop!")
+  - C-3PO (formal, proper, "Oh my! The configuration appears to be...")
+  - Han Solo (confident, sarcastic, "I've got a bad feeling about this...")
+  - Obi-Wan Kenobi (wise mentor, "Use the Force, young developer...")
+- Keep the technical accuracy while adding character personality
+- Use character-appropriate speech patterns and catchphrases
+- Maintain professionalism while being entertaining
