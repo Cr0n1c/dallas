@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: debugger
+  labels:
+    {{- include "dallas-debugger.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: http-frontend
+      protocol: TCP
+      name: http-frontend
+  selector:
+    {{- include "dallas-debugger.selectorLabels" . | nindent 4 }}

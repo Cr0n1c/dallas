@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debugger
+  labels:
+    {{- include "dallas-debugger.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "dallas-debugger.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "dallas-debugger.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: debugger-sa
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: "debugger"
+          image: "{{ .Values.image.ecrRegistry }}.dkr.ecr.us-east-1.amazonaws.com/debugger:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+          ports:
+            - name: http-frontend
+              containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+            - name: var-tmp-volume
+              mountPath: /var/tmp
+            - name: usr-tmp-volume
+              mountPath: /usr/tmp
+            - name: supervisor-logs
+              mountPath: /var/log/supervisor
+            - name: supervisor-run
+              mountPath: /var/run/supervisor
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+        - name: var-tmp-volume
+          emptyDir: {}
+        - name: usr-tmp-volume
+          emptyDir: {}
+        - name: supervisor-logs
+          emptyDir: {}
+        - name: supervisor-run
+          emptyDir: {}

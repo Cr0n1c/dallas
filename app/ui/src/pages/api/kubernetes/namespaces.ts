@@ -1,0 +1,30 @@
+import type { NextApiRequest, NextApiResponse } from 'next'
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  try {
+    // Proxy the request to the backend service
+    const backendUrl = process.env.BACKEND_URL || 'http://127.0.0.1:8000'
+    const response = await fetch(`${backendUrl}/api/kubernetes/namespaces`)
+
+    if (!response.ok) {
+      throw new Error(`Backend responded with status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    res.status(200).json(data)
+  } catch (error) {
+    console.error('Kubernetes namespaces request failed:', error)
+    res.status(500).json({
+      namespaces: [],
+      error: 'Failed to fetch Kubernetes namespaces',
+      timestamp: new Date().toISOString()
+    })
+  }
+}

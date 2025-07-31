@@ -1,0 +1,229 @@
+repos:
+  # =============================================================================
+  # DEPENDENCIES
+  # =============================================================================
+
+  # Dependency check and installation
+  - repo: local
+    hooks:
+      - id: check-dependencies
+        name: "Dependecy: NPM/Python Checker"
+        entry: scripts/check-dependencies.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: update-dependencies
+        name: "Dependency: NPM/Python Updater"
+        entry: scripts/update-packages.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
+        verbose: true
+
+      - id: helm-dependency-update
+        name: "Dependency: Helm Updater"
+        entry: bash -c 'cd charts/debugger && helm dependency update >/dev/null && echo "✅ Helm dependencies updated"'
+        language: system
+        files: ^charts/debugger/Chart\.yaml$
+        pass_filenames: false
+        always_run: true
+
+  # =============================================================================
+  # DEVOPS
+  # =============================================================================
+
+  # DevOps checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+        name: "DevOps: Merge Conflict"
+      - id: check-added-large-files
+        name: "DevOps: Added Large Files"
+        args: ['--maxkb=1000']
+
+  # =============================================================================
+  # LINTING & CODE QUALITY
+  # =============================================================================
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        name: "Lint: Trailing Whitespace"
+      - id: end-of-file-fixer
+        name: "Lint: End of File Fixer"
+      - id: check-yaml
+        name: "Lint: YAML"
+        exclude: ^charts/debugger/templates/.*$
+      - id: check-json
+        name: "Lint: JSON"
+      - id: check-toml
+        name: "Lint: TOML"
+
+  # Python linting
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+        name: "Lint: Python Black"
+        language_version: python3
+        files: ^app/backend/.*\.py$
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: "Lint: Python Isort Black"
+        files: ^app/backend/.*\.py$
+        args: [--profile=black]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        name: "Lint: Python Flake8"
+        files: ^app/backend/.*\.py$
+        args: [--config=app/backend/.flake8]
+
+  # Node.js linting
+  - repo: local
+    hooks:
+      - id: npm-lint
+        name: "Lint: NPM"
+        entry: bash -c 'cd app/ui && npm run lint'
+        language: system
+        files: ^app/ui/.*\.(js|jsx|ts|tsx)$
+        pass_filenames: false
+
+      - id: npm-type-check
+        name: "Lint: Typescript"
+        entry: bash -c 'cd app/ui && npx tsc --noEmit'
+        language: system
+        files: ^app/ui/.*\.(js|jsx|ts|tsx)$
+        pass_filenames: false
+
+  # Helm linting and validation
+  - repo: local
+    hooks:
+      - id: helm-lint
+        name: "Lint: Helm"
+        entry: bash -c 'helm lint charts/debugger/ --strict'
+        language: system
+        files: ^charts/debugger/.*\.(yaml|yml|tpl)$
+        pass_filenames: false
+
+      - id: helm-template-dry-run
+        name: "Lint: Helm Template Dry Run"
+        entry: bash -c 'helm template test-release charts/debugger/ --dry-run --debug >/dev/null && echo "✅ Helm template validation successful"'
+        language: system
+        files: ^charts/debugger/.*\.(yaml|yml|tpl)$
+        pass_filenames: false
+
+      - id: helm-values-lint
+        name: "Lint: Helm Values"
+        entry: bash -c 'cd charts/debugger && helm template test-release . --values values.yaml --dry-run >/dev/null && echo "✅ Helm values validation successful"'
+        language: system
+        files: ^charts/debugger/values\.yaml$
+        pass_filenames: false
+
+  # Docker linting
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.13.1-beta
+    hooks:
+      - id: hadolint-docker
+        name: "Lint: Dockerfile"
+        files: ^docker/Dockerfile$
+        args: ['--ignore', 'DL3008', '--ignore', 'SC2028', '--ignore', 'DL3059', '--ignore', 'SC2015', '--ignore', 'DL4005']
+
+  # =============================================================================
+  # UNIT TESTS
+  # =============================================================================
+
+  # Unit tests and integration tests
+  - repo: local
+    hooks:
+      - id: helm-chart-testing
+        name: "Unit Test: Helm Chart"
+        entry: bash -c 'cd charts/debugger && helm install test-release . --dry-run --debug --namespace test-namespace --create-namespace >/dev/null && echo "✅ Helm chart installation test successful"'
+        language: system
+        files: ^charts/debugger/.*\.(yaml|yml)$
+        pass_filenames: false
+        stages: [manual]
+
+      - id: docker-build-test
+        name: "Unit Test: Docker Build"
+        entry: bash -c 'cd docker && docker build --quiet -t debugger:latest -f Dockerfile .. >/dev/null && echo "✅ Docker build successful" && docker rmi debugger:latest >/dev/null'
+        language: system
+        files: ^docker/(Dockerfile|supervisord\.conf)$
+        pass_filenames: false
+        stages: [manual]
+
+  # =============================================================================
+  # SECURITY & COMPLIANCE
+  # =============================================================================
+
+  # Security checks
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: detect-private-key
+        name: "Security: Private Key"
+
+  - repo: local
+    hooks:
+      - id: docker-cis-compliance
+        name: "Security: Docker CIS Compliance Check"
+        entry: docker/cis-compliance-check.sh
+        args: [infrastructure-debugger]
+        language: system
+        files: ^docker/(Dockerfile|supervisord\.conf|cis-compliance-check\.sh)$
+        pass_filenames: false
+        stages: [manual]
+        verbose: true
+
+      - id: kube-linter
+        name: "Security: Kube-linter"
+        entry: bash -c 'cd charts/debugger && helm template . | kube-linter lint --exclude latest-tag,use-namespace,minimum-three-replicas,no-rolling-update-strategy - || echo "❌ kube-linter found issues"'
+        language: system
+        files: ^charts/debugger/.*\.(yaml|yml|tpl)$
+        pass_filenames: false
+
+  # Trivy vulnerability scanning
+  - repo: local
+    hooks:
+      - id: trivy-fs-python
+        name: "Security: Trivy Python"
+        entry: bash -c 'trivy fs --severity HIGH,CRITICAL --exit-code 1 --format table --skip-dirs venv,__pycache__ app/backend || echo "❌ Trivy found high/critical Python vulnerabilities"'
+        language: system
+        files: ^app/backend/.*\.(py|txt|yaml|yml)$
+        pass_filenames: false
+        always_run: true
+
+      - id: trivy-fs-node
+        name: "Security: Trivy Node/TypeScript"
+        entry: bash -c 'trivy fs --severity HIGH,CRITICAL --exit-code 1 --format table --skip-dirs node_modules,.next app/ui || echo "❌ Trivy found high/critical Node.js/TypeScript vulnerabilities"'
+        language: system
+        files: ^app/ui/.*\.(js|jsx|ts|tsx|json|yaml|yml)$
+        pass_filenames: false
+        always_run: true
+
+      - id: trivy-fs-helm
+        name: "Security: Trivy Helm"
+        entry: bash -c 'trivy fs --severity HIGH,CRITICAL --exit-code 1 --format table charts/debugger || echo "❌ Trivy found high/critical Helm vulnerabilities"'
+        language: system
+        files: ^charts/debugger/.*\.(yaml|yml|tpl)$
+        pass_filenames: false
+        always_run: true
+
+      - id: trivy-docker
+        name: "Security: Trivy Docker Scan"
+        entry: bash -c 'cd docker && trivy image --severity HIGH,CRITICAL --exit-code 1 --format table debugger:latest || echo "❌ Trivy found high/critical Docker vulnerabilities"'
+        language: system
+        files: ^docker/Dockerfile$
+        pass_filenames: false
+        stages: [manual]
